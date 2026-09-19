@@ -1,13 +1,13 @@
-package replacememodid;
+package mctest;
 
 import java.util.Map;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 
 @IFMLLoadingPlugin.MCVersion("1.12.2")
-public class ReplaceMeModNamePlugin implements IFMLLoadingPlugin {
+public class McModTestPlugin implements IFMLLoadingPlugin {
 
-	public ReplaceMeModNamePlugin() {
+	public McModTestPlugin() {
 		MixinBootstrap.init();
 		//Replaced by @MixinConfig.MixinToggle:
 
