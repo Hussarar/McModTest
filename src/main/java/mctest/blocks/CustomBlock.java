@@ -11,5 +11,6 @@ public class CustomBlock extends Block {
         this.setTranslationKey("custom_b");
         this.translucent = true;
         this.lightValue = 15;
+        this.setDefaultSlipperiness(1f);
     }
 }
