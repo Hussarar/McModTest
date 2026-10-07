@@ -94,8 +94,13 @@ public class ShaderHelper {
         }
     }
 
-    /** Call this with the GUI projection active (e.g. RenderGameOverlayEvent.Pre, ElementType.ALL). */
-    public static void renderShaderOverlay() {
+    /**
+     * Draws the sanity shader over the whole screen.
+     * Needs the GUI projection to be active (RenderGameOverlayEvent / GuiScreenEvent).
+     *
+     * @param sanityIntensity 0 = sane (no effect), 1 = fully insane
+     */
+    public static void renderShaderOverlay(float sanityIntensity) {
         if (!isLoaded || hasFailed) return;
 
         Minecraft mc = Minecraft.getMinecraft();
@@ -125,6 +130,7 @@ public class ShaderHelper {
         GL20.glUniform1f(GL20.glGetUniformLocation(shaderProgram, "viewHeight"), h);
         GL20.glUniform1f(GL20.glGetUniformLocation(shaderProgram, "frameTimeCounter"),
                 (float) ((System.currentTimeMillis() % 1000000L) / 1000.0));
+        GL20.glUniform1f(GL20.glGetUniformLocation(shaderProgram, "sanityIntensity"), sanityIntensity);
 
         // 4. Quad in SCALED GUI coordinates (FBO textures are bottom-up, hence v flipped)
         double sw = sr.getScaledWidth_double();

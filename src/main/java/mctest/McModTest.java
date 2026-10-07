@@ -59,10 +59,13 @@ public class McModTest {
     // Das ist unser Netzwerk-Kanal. "mctest" ist der Name, "1" ist die Protokoll-Version
     public static final net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper NETWORK = net.minecraftforge.fml.common.network.NetworkRegistry.INSTANCE.newSimpleChannel("mctest");
 
-	@Instance(MODID)
-	public static McModTest instance;
+    /** Effect starts below this sanity value and reaches full strength at 0. */
+    private static final float SANITY_THRESHOLD = 50f;
 
-	@Mod.EventHandler
+    @Instance(MODID)
+    public static McModTest instance;
+
+    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -102,12 +105,17 @@ public class McModTest {
         ModelLoader.setCustomModelResourceLocation(klugsword, 0, new ModelResourceLocation(klugsword.getRegistryName(), "inventory"));
     }
 
-    private boolean shouldApplySanityEffect() {
+    /** 0 = effect off, 1 = sanity at 0 */
+    private float getSanityIntensity() {
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.player == null || mc.world == null) return false;
-        if (!mc.player.hasCapability(ModCapabilities.SANITY_CAP, null)) return false;
+        if (mc.player == null || mc.world == null) return 0f;
+        if (!mc.player.hasCapability(ModCapabilities.SANITY_CAP, null)) return 0f;
+
         ISanityCapability cap = mc.player.getCapability(ModCapabilities.SANITY_CAP, null);
-        return cap != null && cap.getSanity() < 50;
+        if (cap == null) return 0f;
+
+        float i = (SANITY_THRESHOLD - cap.getSanity()) / SANITY_THRESHOLD;
+        return Math.max(0f, Math.min(1f, i));
     }
 
     // HUD pass: only when NO screen is open
@@ -115,19 +123,22 @@ public class McModTest {
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
         if (Minecraft.getMinecraft().currentScreen != null) return; // the screen pass handles it
-        if (!shouldApplySanityEffect()) return;
+
+        float intensity = getSanityIntensity();
+        if (intensity <= 0f) return;
 
         ShaderHelper.loadShader();
-        ShaderHelper.renderShaderOverlay();
+        ShaderHelper.renderShaderOverlay(intensity);
     }
 
     // Screen pass: inventory, chests, pause menu, etc.
     @SubscribeEvent
     public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (!shouldApplySanityEffect()) return;
+        float intensity = getSanityIntensity();
+        if (intensity <= 0f) return;
 
         ShaderHelper.loadShader();
-        ShaderHelper.renderShaderOverlay();
+        ShaderHelper.renderShaderOverlay(intensity);
     }
 
     @SubscribeEvent
